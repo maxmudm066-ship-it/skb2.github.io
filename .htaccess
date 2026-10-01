@@ -1,0 +1,25 @@
+# ============================================================================
+# Каталог загрузок: только изображения, исполнение скриптов запрещено
+# ============================================================================
+
+# Отключаем PHP-интерпретатор (mod_php)
+<IfModule mod_php.c>
+    php_flag engine off
+</IfModule>
+
+# Снимаем обработчики скриптов
+RemoveHandler .php .phtml .php3 .php4 .php5 .php7 .phar .pht .cgi .pl .py
+RemoveType    .php .phtml .php3 .php4 .php5 .php7 .phar .pht
+
+# Любые скрипты и конфигурации — 403
+<FilesMatch "\.(?i:php|pht|phtml|php3|php4|php5|php7|phps|phar|pl|py|cgi|sh|bash|shtml|asp|aspx|jsp|hta|htaccess|htpasswd|ini|log|sql)$">
+    Require all denied
+</FilesMatch>
+
+# Явные MIME-типы разрешённых изображений
+AddType image/jpeg .jpg .jpeg
+AddType image/png  .png
+AddType image/webp .webp
+AddType image/gif  .gif
+AddType image/svg+xml .svg
+AddType image/x-icon .ico

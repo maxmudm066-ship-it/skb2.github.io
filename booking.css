@@ -1,0 +1,817 @@
+/* ============================================================================
+   ЦКБ № 2 — мастер онлайн-записи (zapis.php)
+   Подключается после main.css
+   ========================================================================== */
+
+/* ---- Каркас мастера ------------------------------------------------------- */
+
+.booking {
+    padding: 48px 16px 96px;
+    scroll-margin-top: calc(var(--header-h) + 16px);
+}
+
+.booking-stepinfo {
+    margin: 24px 0 0;
+    text-align: center;
+    font-size: 13px;
+    color: var(--c-muted);
+}
+
+/* ---- Прогресс шагов ------------------------------------------------------- */
+
+.booking-progress {
+    display: flex;
+    gap: 6px;
+    margin: 0 0 28px;
+    padding: 0;
+    list-style: none;
+}
+
+.booking-progress__item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    position: relative;
+    padding-top: 6px;
+}
+
+/* соединительная линия */
+.booking-progress__item::before {
+    content: "";
+    position: absolute;
+    top: 16px;
+    left: -50%;
+    width: 100%;
+    height: 2px;
+    background: var(--c-border);
+    transition: background var(--t);
+}
+
+.booking-progress__item:first-child::before { display: none; }
+
+.booking-progress__item.is-done::before,
+.booking-progress__item.is-active::before {
+    background: var(--c-accent);
+}
+
+.booking-progress__num {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--c-surface);
+    border: 2px solid var(--c-border);
+    color: var(--c-muted);
+    font-weight: 700;
+    font-size: 14px;
+    transition: all var(--t);
+    position: relative;
+    z-index: 1;
+}
+
+.booking-progress__item.is-active .booking-progress__num {
+    border-color: var(--c-accent);
+    color: var(--c-accent-dark);
+    box-shadow: 0 0 0 4px var(--c-accent-soft);
+}
+
+.booking-progress__item.is-done .booking-progress__num {
+    background: var(--c-accent);
+    border-color: var(--c-accent);
+    color: #fff;
+}
+
+.booking-progress__label {
+    font-size: 12px;
+    color: var(--c-muted);
+    text-align: center;
+    display: none;
+}
+
+.booking-step__title {
+    font-size: 22px;
+    margin-bottom: 20px;
+}
+
+@media (min-width: 640px) {
+    .booking-progress__label { display: block; }
+    .booking-step__title { font-size: 26px; }
+}
+
+/* ---- Шаг 1: плитки направлений -------------------------------------------- */
+
+.dept-tiles {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 16px;
+}
+
+@media (min-width: 640px) { .dept-tiles { grid-template-columns: repeat(2, 1fr); } }
+@media (min-width: 1200px) { .dept-tiles { grid-template-columns: repeat(3, 1fr); } }
+
+.dept-tile {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 24px;
+    background: var(--c-surface);
+    border: 1px solid var(--c-border);
+    border-radius: var(--radius);
+    text-align: left;
+    font-family: inherit;
+    font-size: 15px;
+    color: var(--c-text);
+    cursor: pointer;
+    transition: border-color var(--t);
+}
+
+.dept-tile .icon {
+    width: 28px;
+    height: 28px;
+    color: var(--c-accent-dark);
+}
+
+.dept-tile__name {
+    font-weight: 700;
+    color: var(--c-primary);
+    line-height: 1.35;
+}
+
+.dept-tile__count {
+    font-size: 13px;
+    color: var(--c-muted);
+}
+
+.dept-tile:hover:not(:disabled) {
+    border-color: var(--c-border-strong);
+}
+
+.dept-tile.is-selected {
+    border-color: var(--c-accent);
+    background: var(--c-accent-soft);
+}
+
+.dept-tile:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* ---- Шаг 2: список врачей -------------------------------------------------- */
+
+.booking-count {
+    font-size: 14px;
+    color: var(--c-muted);
+    margin: 0 0 12px;
+}
+
+.doctor-rows {
+    display: grid;
+    gap: 16px;
+}
+
+.doctor-row {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    width: 100%;
+    padding: 18px;
+    background: var(--c-surface);
+    border: 1px solid var(--c-border);
+    border-radius: var(--radius);
+    text-align: left;
+    font-family: inherit;
+    font-size: 15px;
+    color: var(--c-text);
+    cursor: pointer;
+    transition: border-color var(--t);
+}
+
+.doctor-row:hover {
+    border-color: var(--c-border-strong);
+}
+
+.doctor-row.is-selected {
+    border-color: var(--c-accent);
+    background: var(--c-accent-soft);
+}
+
+.doctor-row__photo {
+    flex: 0 0 64px;
+    width: 64px;
+    height: 76px;
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+    background: var(--c-accent-soft);
+}
+
+.doctor-row__photo img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center top;
+}
+
+.doctor-row__initials {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    font-weight: 700;
+    font-size: 20px;
+    color: var(--c-accent-dark);
+}
+
+.doctor-row__body {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    min-width: 0;
+    flex: 1;
+}
+
+.doctor-row__category {
+    align-self: flex-start;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--c-accent-dark);
+    background: var(--c-accent-soft);
+    border-radius: 999px;
+    padding: 3px 10px;
+}
+
+.doctor-row__name {
+    font-size: 16px;
+    color: var(--c-primary);
+    line-height: 1.3;
+}
+
+.doctor-row__position { font-size: 13px; color: var(--c-muted); }
+
+.doctor-row__meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 14px;
+    margin-top: 4px;
+    font-size: 13px;
+    color: var(--c-muted);
+}
+
+.doctor-row__meta-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.doctor-row__meta-item .icon { width: 15px; height: 15px; color: var(--c-accent-dark); }
+
+.doctor-row__arrow {
+    color: #CBD5E1;
+    transition: transform var(--t), color var(--t);
+}
+
+.doctor-row:hover .doctor-row__arrow {
+    transform: translateX(3px);
+    color: var(--c-accent-dark);
+}
+
+/* ---- Шаг 3: сводка выбранного врача ---------------------------------------- */
+
+.booking-mini {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px 12px;
+    padding: 12px 16px;
+    margin-bottom: 20px;
+    background: var(--c-accent-soft);
+    border: 1px solid rgba(13, 148, 136, 0.25);
+    border-radius: var(--radius);
+    font-size: 14px;
+}
+
+.booking-mini__label { color: var(--c-muted); }
+
+.booking-mini__name { color: var(--c-primary); font-size: 15px; }
+
+.booking-mini__position { color: var(--c-muted); }
+
+.booking-mini .btn { margin-left: auto; }
+
+/* ---- Шаг 3: календарь + слоты ---------------------------------------------- */
+
+.booking-datetime {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 20px;
+    align-items: start;
+}
+
+@media (min-width: 900px) {
+    .booking-datetime { grid-template-columns: 340px 1fr; }
+}
+
+.cal {
+    background: var(--c-surface);
+    border: 1px solid var(--c-border);
+    border-radius: var(--radius);
+    padding: 16px;
+    transition: opacity var(--t);
+}
+
+.cal.is-loading { opacity: 0.6; }
+
+.cal__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+}
+
+.cal__title { font-size: 16px; color: var(--c-primary); }
+
+.cal__nav {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    border: 1px solid var(--c-border);
+    border-radius: var(--radius-sm);
+    background: var(--c-surface);
+    color: var(--c-muted);
+    cursor: pointer;
+    transition: border-color var(--t), color var(--t);
+}
+
+.cal__nav:hover { border-color: var(--c-accent); color: var(--c-accent-dark); }
+
+.cal__week,
+.cal__grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 4px;
+}
+
+.cal__week {
+    margin-bottom: 8px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--c-muted);
+    text-align: center;
+    text-transform: uppercase;
+}
+
+.cal__day {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    aspect-ratio: 1;
+    min-height: 38px;
+    border: 1px solid transparent;
+    border-radius: var(--radius-sm);
+    font-family: inherit;
+    font-size: 14px;
+    color: var(--c-text);
+}
+
+button.cal__day {
+    background: var(--c-bg);
+    cursor: pointer;
+    transition: background var(--t), border-color var(--t), color var(--t);
+}
+
+button.cal__day:hover {
+    background: var(--c-accent-soft);
+    border-color: var(--c-accent);
+    color: var(--c-accent-dark);
+}
+
+.cal__day--pad { visibility: hidden; }
+
+.cal__day.is-past { color: #CBD5E1; }
+
+.cal__day.is-off { color: #CBD5E1; }
+
+.cal__day.is-full {
+    color: #94A3B8;
+    background: var(--c-bg);
+    text-decoration: line-through;
+}
+
+.cal__day.is-today {
+    border-color: var(--c-accent);
+    color: var(--c-accent-dark);
+    font-weight: 700;
+}
+
+.cal__day.is-selected,
+.cal__day.is-selected:hover {
+    background: var(--c-accent);
+    border-color: var(--c-accent);
+    color: #fff;
+    font-weight: 700;
+}
+
+/* ---- Панель слотов --------------------------------------------------------- */
+
+.booking-slots__date {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--c-muted);
+    text-transform: capitalize;
+    margin: 0 0 4px;
+}
+
+.booking-slots__title {
+    font-size: 18px;
+    margin-bottom: 6px;
+}
+
+.booking-slots__hint {
+    font-size: 13px;
+    color: var(--c-muted);
+    margin: 0 0 14px;
+}
+
+.slot-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
+    gap: 12px;
+}
+
+.slot {
+    padding: 12px 8px;
+    background: var(--c-surface);
+    border: 1px solid var(--c-border);
+    border-radius: var(--radius-sm);
+    font-family: inherit;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--c-primary);
+    cursor: pointer;
+    text-align: center;
+    transition: border-color var(--t), background var(--t), color var(--t);
+}
+
+.slot:hover {
+    border-color: var(--c-accent);
+    color: var(--c-accent-dark);
+}
+
+.slot.is-selected,
+.slot.is-selected:hover {
+    background: var(--c-accent);
+    border-color: var(--c-accent);
+    color: #fff;
+}
+
+/* ---- Кнопки шагов ---------------------------------------------------------- */
+
+.booking-actions {
+    display: flex;
+    gap: 12px;
+    margin-top: 24px;
+}
+
+.booking-actions--form {
+    margin-top: 8px;
+}
+
+@media (max-width: 480px) {
+    .booking-actions .btn { flex: 1; }
+}
+
+.booking-note {
+    margin: 14px 0 0;
+    font-size: 12px;
+    color: var(--c-muted);
+}
+
+/* ---- Шаг 4: форма + сводка -------------------------------------------------- */
+
+.booking-form-wrap {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 24px;
+    align-items: start;
+}
+
+@media (min-width: 900px) {
+    .booking-form-wrap { grid-template-columns: 7fr 5fr; }
+}
+
+#booking-form { display: grid; gap: 18px; }
+
+.field-row {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 18px;
+}
+
+@media (min-width: 640px) {
+    .field-row { grid-template-columns: 1fr 1fr; }
+}
+
+.req { color: var(--c-danger); }
+
+.opt { color: var(--c-muted); font-weight: 400; font-size: 13px; }
+
+.field__error {
+    margin: 0;
+    font-size: 13px;
+    color: var(--c-danger);
+}
+
+.field.is-error .field__input,
+.field.is-error .field__input:focus {
+    border-color: var(--c-danger);
+    box-shadow: 0 0 0 3px var(--c-danger-soft);
+}
+
+/* honeypot — скрыт от людей, виден ботам */
+.hp-field {
+    position: absolute !important;
+    left: -9999px !important;
+    top: -9999px !important;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+}
+
+/* кастомный чекбокс согласия */
+.check {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    cursor: pointer;
+    user-select: none;
+}
+
+.check input {
+    position: absolute;
+    opacity: 0;
+    width: 1px;
+    height: 1px;
+}
+
+.check__box {
+    flex: 0 0 22px;
+    width: 22px;
+    height: 22px;
+    margin-top: 2px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid var(--c-border);
+    border-radius: 4px;
+    background: var(--c-surface);
+    color: transparent;
+    transition: all var(--t);
+}
+
+.check__box .icon { width: 14px; height: 14px; stroke-width: 3; }
+
+.check:hover .check__box { border-color: var(--c-accent); }
+
+.check input:checked + .check__box {
+    background: var(--c-accent);
+    border-color: var(--c-accent);
+    color: #fff;
+}
+
+.check input:focus-visible + .check__box {
+    outline: 2px solid var(--c-accent);
+    outline-offset: 2px;
+}
+
+.check__label { font-size: 14px; color: var(--c-muted); line-height: 1.5; }
+
+/* ---- Общий алерт формы ------------------------------------------------------- */
+
+.form-alert {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px 16px;
+    padding: 14px 16px;
+    background: var(--c-danger-soft);
+    border: 1px solid rgba(180, 35, 24, 0.3);
+    border-radius: var(--radius);
+    color: var(--c-danger);
+    font-size: 14px;
+}
+
+.form-alert .icon { color: var(--c-danger); }
+
+.form-alert p { margin: 0; flex: 1 1 200px; }
+
+.form-alert .btn { margin: 0; }
+
+/* ---- Сводка заявки (шаг 4, справа) -------------------------------------------- */
+
+.booking-summary {
+    background: var(--c-surface);
+    border: 1px solid var(--c-border);
+    border-radius: var(--radius);
+    padding: 20px;
+    position: sticky;
+    top: calc(var(--header-h) + 16px);
+}
+
+.booking-summary h3 {
+    font-size: 16px;
+    margin-bottom: 14px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid var(--c-accent-soft);
+}
+
+.booking-summary dl {
+    margin: 0 0 14px;
+    display: grid;
+    gap: 10px;
+}
+
+.booking-summary__row {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    font-size: 14px;
+}
+
+.booking-summary__row dt { color: var(--c-muted); flex-shrink: 0; }
+
+.booking-summary__row dd {
+    margin: 0;
+    font-weight: 600;
+    color: var(--c-primary);
+    text-align: right;
+}
+
+/* ---- Шаг 5: подтверждение ------------------------------------------------------ */
+
+.booking-done {
+    max-width: 720px;
+    margin: 0 auto;
+    background: var(--c-surface);
+    border: 1px solid var(--c-border);
+    border-radius: var(--radius);
+    padding: 32px 20px;
+    text-align: center;
+}
+
+@media (min-width: 640px) {
+    .booking-done { padding: 40px 48px; }
+}
+
+.booking-done__head { margin-bottom: 20px; }
+
+.booking-done__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 64px;
+    height: 64px;
+    margin-bottom: 14px;
+    border-radius: 50%;
+    background: var(--c-accent-soft);
+    color: var(--c-accent-dark);
+}
+
+.booking-done__icon .icon { width: 32px; height: 32px; stroke-width: 2.5; }
+
+.booking-done__title { font-size: 26px; margin-bottom: 6px; }
+
+.booking-done__lead { color: var(--c-muted); max-width: 480px; margin: 0 auto; }
+
+.booking-ticket {
+    display: inline-flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 16px 32px;
+    margin: 8px 0 24px;
+    background: var(--c-primary);
+    color: #fff;
+    border-radius: var(--radius);
+}
+
+.booking-ticket__label {
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.booking-ticket__num {
+    font-size: 26px;
+    letter-spacing: 0.04em;
+    font-variant-numeric: tabular-nums;
+}
+
+.booking-done__grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 2px;
+    margin: 0 0 24px;
+    text-align: left;
+    border: 1px solid var(--c-border);
+    border-radius: var(--radius);
+    overflow: hidden;
+}
+
+@media (min-width: 640px) {
+    .booking-done__grid { grid-template-columns: 1fr 1fr; }
+}
+
+.booking-done__cell {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 12px 16px;
+    background: var(--c-bg);
+    font-size: 14px;
+}
+
+.booking-done__cell:nth-child(odd) { background: var(--c-surface); }
+
+@media (min-width: 640px) {
+    .booking-done__cell { background: var(--c-surface) !important; }
+    .booking-done__cell:nth-child(odd) { background: var(--c-bg) !important; }
+}
+
+.booking-done__cell dt { color: var(--c-muted); }
+
+.booking-done__cell dd { margin: 0; font-weight: 600; color: var(--c-primary); text-align: right; }
+
+.booking-instructions {
+    text-align: left;
+    padding: 20px;
+    margin-bottom: 24px;
+    background: var(--c-accent-soft);
+    border-radius: var(--radius);
+}
+
+.booking-instructions h3 { font-size: 16px; margin-bottom: 10px; }
+
+.booking-instructions ol {
+    margin: 0;
+    padding-left: 20px;
+    display: grid;
+    gap: 8px;
+    font-size: 14px;
+    color: var(--c-text);
+    list-style: decimal;
+}
+
+.booking-done__actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 12px;
+}
+
+/* ---- Индикатор загрузки --------------------------------------------------------- */
+
+.booking-loader {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 20px 4px;
+    color: var(--c-muted);
+    font-size: 14px;
+}
+
+.booking-loader span {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    border: 2px solid var(--c-border);
+    border-top-color: var(--c-accent);
+    animation: booking-spin 0.8s linear infinite;
+}
+
+@keyframes booking-spin {
+    to { transform: rotate(360deg); }
+}
+
+/* ---- Печать заявки --------------------------------------------------------------- */
+
+@media print {
+    .booking { padding: 0; }
+    .booking-progress,
+    .booking-stepinfo,
+    .booking-done__actions {
+        display: none;
+    }
+    .booking-done {
+        box-shadow: none;
+        border: none;
+        padding: 0;
+    }
+    .booking-ticket { background: none; color: var(--c-primary); }
+    .booking-ticket__label { color: var(--c-muted); }
+}

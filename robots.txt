@@ -1,0 +1,12 @@
+User-agent: *
+Disallow: /admin/
+Disallow: /api/
+Disallow: /config/
+Disallow: /includes/
+Disallow: /classes/
+Disallow: /storage/
+Disallow: /uploads/doctors/
+Disallow: /uploads/news/
+
+User-agent: GPTBot
+Disallow: /
